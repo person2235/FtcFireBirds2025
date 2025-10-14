@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
 import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
@@ -12,10 +14,11 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import static java.lang.Math.abs;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -46,21 +49,77 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Indexer", group = "Sensor")
+@TeleOp(name = "Indexer", group = "LinearOpMode")
 
 
 public class Indexer {
 
-    ColorSensor CS; //color sensor to index balls
+    NormalizedColorSensor CS; //color sensor to index balls
     Servo SV; // servo to pop balls out
     DcMotor SM; //spinning motor of indexer
 
     private ElapsedTime runtime = new ElapsedTime();
 
+    View relativeLayout;
+
+    public void run() {
+        relativeLayout.setBackgroundColor(Color.WHITE);
+    }
+
+    double SVdefault = 0;
+    double SMPPR = 3895.9;
+    double speed = 0.5;
+
+    //Green color values
+    double GHue = 120;
+    double GRed = 0;
+    double GBlue = 0;
+    double GGreen = 0;
+
+    //Purple color values
+    double PHue = 240;
+    double PRed = 0;
+    double PBlue = 0;
+    double PGreen = 0;
+
+    boolean atTargetPos = false;
+    boolean BallGreen = false;
+    boolean BallPurple = false;
+
+    public void Index(int greenBallPos) { //greenBallPos is position of green ball in the pattern, can only be from 1-3, so 1 is gpp, 2 is pgp, 3 is ppg
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
+
+        atTargetPos = false;
 
 
-    public void Index(int greenBallPos) {
-        double speed = 0.5;
+
+        SM = hardwareMap.dcMotor.get("SM");
+        SM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        SM.setDirection(DcMotor.Direction.REVERSE);
+        SM.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //3895.9 PPR for 43 rpm motor(goBilda YellowJacket)
+
+        SV = hardwareMap.servo.get("SV");
+        SV.setPosition(SVdefault);
+
+        CS = hardwareMap.get(NormalizedColorSensor.class, "CS");
+
+        NormalizedRGBA colors = CS.getNormalizedColors();
+
+        final float[] hsvValues = new float[3];
+
+        if (Math.abs(SM.getCurrentPosition() - SM.getTargetPosition()) < 10) {
+            atTargetPos = true;
+        }
+        //color check:
+        if (Math.abs(hsvValues[0] - GHue) <= 20){
+            BallGreen = true;
+            BallPurple = false;
+        } else if (Math.abs(hsvValues[0] - PHue) <= 20) {
+            BallPurple = true;
+            BallGreen = false;
+        }
+
 
     }
 
