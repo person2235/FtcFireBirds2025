@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import static java.lang.Math.abs;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -66,19 +66,35 @@ public class Indexer {
         relativeLayout.setBackgroundColor(Color.WHITE);
     }
 
+    double SVdefault = 0;
+    double SMPPR = 3895.9;
+    double speed = 0.5;
 
+    //Green color values
+    double GHue = 120;
+    double GRed = 0;
+    double GBlue = 0;
+    double GGreen = 0;
+
+    //Purple color values
+    double PHue = 240;
+    double PRed = 0;
+    double PBlue = 0;
+    double PGreen = 0;
+
+    boolean atTargetPos = false;
+    boolean BallGreen = false;
+    boolean BallPurple = false;
 
     public void Index(int greenBallPos) { //greenBallPos is position of green ball in the pattern, can only be from 1-3, so 1 is gpp, 2 is pgp, 3 is ppg
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
         relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
-        double SVdefault = 0;
-        double SMPPR = 3895.9;
-        double speed = 0.5;
+        atTargetPos = false;
+
 
 
         SM = hardwareMap.dcMotor.get("SM");
-        SM.setPower(0);
         SM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         SM.setDirection(DcMotor.Direction.REVERSE);
         SM.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //3895.9 PPR for 43 rpm motor(goBilda YellowJacket)
@@ -90,11 +106,19 @@ public class Indexer {
 
         NormalizedRGBA colors = CS.getNormalizedColors();
 
-        
+        final float[] hsvValues = new float[3];
 
-
-
-
+        if (Math.abs(SM.getCurrentPosition() - SM.getTargetPosition()) < 10) {
+            atTargetPos = true;
+        }
+        //color check:
+        if (Math.abs(hsvValues[0] - GHue) <= 20){
+            BallGreen = true;
+            BallPurple = false;
+        } else if (Math.abs(hsvValues[0] - PHue) <= 20) {
+            BallPurple = true;
+            BallGreen = false;
+        }
 
 
     }
