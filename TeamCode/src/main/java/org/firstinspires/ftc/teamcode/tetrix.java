@@ -153,7 +153,8 @@ public class tetrix extends OpMode
             Front.setPower(frontPower);
             Back.setPower(backPower);
         }
-        if (gamepad1.dpad_down) {// testing fliping code
+        //only flips the code vertically because of the 2 1:3 gear ratios on the left and right motor
+        else if (gamepad1.dpad_down) {// testing fliping code
             Left.setPower(-leftPower);
             Right.setPower(-rightPower);
             Front.setPower(-frontPower);
