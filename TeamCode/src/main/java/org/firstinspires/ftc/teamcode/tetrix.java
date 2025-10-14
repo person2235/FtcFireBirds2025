@@ -147,19 +147,20 @@ public class tetrix extends OpMode
         Front.setPower(frontPower);
         Back.setPower(backPower);
         */
+        //only flips the code vertically because of the 2 1:3 gear ratios on the left and right motor
         if (gamepad1.dpad_up) {// testing flipping code
             Left.setPower(leftPower);
             Right.setPower(rightPower);
             Front.setPower(frontPower);
             Back.setPower(backPower);
-        }
-        //only flips the code vertically because of the 2 1:3 gear ratios on the left and right motor
-        else if (gamepad1.dpad_down) {// testing fliping code
+        }else if (gamepad1.dpad_down) {// testing fliping code
             Left.setPower(-leftPower);
             Right.setPower(-rightPower);
             Front.setPower(-frontPower);
             Back.setPower(-backPower);
         }
+
+
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());

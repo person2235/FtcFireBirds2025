@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -54,74 +55,81 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Indexer {
 
-    NormalizedColorSensor CS; //color sensor to index balls
-    Servo SV; // servo to pop balls out
-    DcMotor SM; //spinning motor of indexer
 
-    private ElapsedTime runtime = new ElapsedTime();
+    public Indexer(HardwareMap hardwareMap) {
 
-    View relativeLayout;
+        NormalizedColorSensor CS; //color sensor to index balls
+        Servo SV; // servo to pop balls out
+        DcMotor SM; //spinning motor of indexer
 
-    public void run() {
+        ElapsedTime runtime = new ElapsedTime();
+
+        View relativeLayout;
+
+
         relativeLayout.setBackgroundColor(Color.WHITE);
-    }
-
-    double SVdefault = 0;
-    double SMPPR = 3895.9;
-    double speed = 0.5;
-
-    //Green color values
-    double GHue = 120;
-    double GRed = 0;
-    double GBlue = 0;
-    double GGreen = 0;
-
-    //Purple color values
-    double PHue = 240;
-    double PRed = 0;
-    double PBlue = 0;
-    double PGreen = 0;
-
-    boolean atTargetPos = false;
-    boolean BallGreen = false;
-    boolean BallPurple = false;
-
-    public void Index(int greenBallPos) { //greenBallPos is position of green ball in the pattern, can only be from 1-3, so 1 is gpp, 2 is pgp, 3 is ppg
-        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
-        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
-
-        atTargetPos = false;
 
 
+        double SVdefault = 0;
+        double SMPPR = 3895.9;
+        double speed = 0.5;
 
-        SM = hardwareMap.dcMotor.get("SM");
-        SM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        SM.setDirection(DcMotor.Direction.REVERSE);
-        SM.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //3895.9 PPR for 43 rpm motor(goBilda YellowJacket)
+        //Green color values
+        double GHue = 120;
+        double GRed = 0;
+        double GBlue = 0;
+        double GGreen = 0;
 
-        SV = hardwareMap.servo.get("SV");
-        SV.setPosition(SVdefault);
+        //Purple color values
+        double PHue = 240;
+        double PRed = 0;
+        double PBlue = 0;
+        double PGreen = 0;
 
-        CS = hardwareMap.get(NormalizedColorSensor.class, "CS");
+        boolean atTargetPos = false;
+        boolean BallGreen = false;
+        boolean BallPurple = false;
 
-        NormalizedRGBA colors = CS.getNormalizedColors();
+        public void Index( int greenBallPos){ //greenBallPos is position of green ball in the pattern, can only be from 1-3, so 1 is gpp, 2 is pgp, 3 is ppg
+            int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+            relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
-        final float[] hsvValues = new float[3];
+            atTargetPos = false;
 
-        if (Math.abs(SM.getCurrentPosition() - SM.getTargetPosition()) < 10) {
-            atTargetPos = true;
+
+            SM = hardwareMap.dcMotor.get("SM");
+            SM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            SM.setDirection(DcMotor.Direction.REVERSE);
+            SM.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //3895.9 PPR for 43 rpm motor(goBilda YellowJacket)
+
+            SV = hardwareMap.servo.get("SV");
+            SV.setPosition(SVdefault);
+
+            CS = hardwareMap.get(NormalizedColorSensor.class, "CS");
+
+            NormalizedRGBA colors = CS.getNormalizedColors();
+
+            final float[] hsvValues = new float[3];
+
+            if (Math.abs(SM.getCurrentPosition() - SM.getTargetPosition()) < 10) {
+                atTargetPos = true;
+            }
+            //color check:
+            if (Math.abs(hsvValues[0] - GHue) <= 20) {
+                BallGreen = true;
+                BallPurple = false;
+            } else if (Math.abs(hsvValues[0] - PHue) <= 20) {
+                BallPurple = true;
+                BallGreen = false;
+            }
+
+            telemetry.addData("BallGreen: ", BallGreen);
+            telemetry.addData("BallPurple: ", BallPurple);
+            telemetry.update();
+
+
         }
-        //color check:
-        if (Math.abs(hsvValues[0] - GHue) <= 20){
-            BallGreen = true;
-            BallPurple = false;
-        } else if (Math.abs(hsvValues[0] - PHue) <= 20) {
-            BallPurple = true;
-            BallGreen = false;
-        }
 
 
     }
-
-
 }
