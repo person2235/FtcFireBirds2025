@@ -142,7 +142,8 @@ public class tetrix extends OpMode
         // rightPower = -gamepad1.right_stick_y ;
 
         // Send calculated power to wheels
-        Left.setPower(leftPower);
+        /*
+        Left.setPower(leftPower);// original working movement code
         Right.setPower(rightPower);
         Front.setPower(frontPower);
         Back.setPower(backPower);
