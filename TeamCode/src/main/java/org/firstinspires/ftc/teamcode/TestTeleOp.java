@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 
@@ -10,14 +11,18 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name="TestTeleOp", group="Linear OpMode")
 public class TestTeleOp extends LinearOpMode {
 
+//    null huzz;
+
     public void runOpMode() {
 
-        Indexer Index = new Indexer(hardwareMap);
+        Indexer Indexee = new Indexer(hardwareMap);
 
         waitForStart();
 
         while( opModeIsActive() ) {
-
+            int greenBallPos;
+            greenBallPos = 2;
+            Indexee.Index(greenBallPos);
 
 
         }

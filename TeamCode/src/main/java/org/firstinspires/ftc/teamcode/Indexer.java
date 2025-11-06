@@ -1,4 +1,6 @@
+
 package org.firstinspires.ftc.teamcode;
+
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
@@ -23,8 +25,7 @@ import static java.lang.Math.abs;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-/*
- * This OpMode shows how to use a color sensor in a generic
+ /* This OpMode shows how to use a color sensor in a generic
  * way, regardless of which particular make or model of color sensor is used. The OpMode
  * assumes that the color sensor is configured with a name of "sensor_color".
  *
@@ -48,88 +49,101 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * different sensor if you need precise distance measurements.
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
-@TeleOp(name = "Indexer", group = "LinearOpMode")
+ * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list*/
+
+
 
 
 public class Indexer {
+    View relativeLayout;
 
+
+    NormalizedColorSensor CS; //color sensor to index balls
+    Servo SV; // servo to pop balls out
+    DcMotor SM; //spinning motor of indexer
+
+    ElapsedTime runtime = new ElapsedTime();
+
+
+
+
+
+
+
+    double SVdefault = 0;
+    double SMPPR = 3895.9;
+    double speed = 0.5;
+
+    //Green color values
+    double GHue = 120;
+    double GRed = 0;
+    double GBlue = 0;
+    double GGreen = 0;
+
+    //Purple color values
+    double PHue = 240;
+    double PRed = 0;
+    double PBlue = 0;
+    double PGreen = 0;
+
+    boolean atTargetPos = false;
+    boolean BallGreen = false;
+    boolean BallPurple = false;
 
     public Indexer(HardwareMap hardwareMap) {
 
-        NormalizedColorSensor CS; //color sensor to index balls
-        Servo SV; // servo to pop balls out
-        DcMotor SM; //spinning motor of indexer
 
-        ElapsedTime runtime = new ElapsedTime();
-
-        View relativeLayout;
-
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
         relativeLayout.setBackgroundColor(Color.WHITE);
+    }
 
 
-        double SVdefault = 0;
-        double SMPPR = 3895.9;
-        double speed = 0.5;
+    public void Index(int greenBallPos) { //greenBallPos is position of green ball in the pattern, can only be from 1-3, so 1 is gpp, 2 is pgp, 3 is ppg
+        int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
+        relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
-        //Green color values
-        double GHue = 120;
-        double GRed = 0;
-        double GBlue = 0;
-        double GGreen = 0;
-
-        //Purple color values
-        double PHue = 240;
-        double PRed = 0;
-        double PBlue = 0;
-        double PGreen = 0;
-
-        boolean atTargetPos = false;
-        boolean BallGreen = false;
-        boolean BallPurple = false;
-
-        public void Index( int greenBallPos){ //greenBallPos is position of green ball in the pattern, can only be from 1-3, so 1 is gpp, 2 is pgp, 3 is ppg
-            int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
-            relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
-
-            atTargetPos = false;
+        atTargetPos = false;
 
 
-            SM = hardwareMap.dcMotor.get("SM");
-            SM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            SM.setDirection(DcMotor.Direction.REVERSE);
-            SM.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //3895.9 PPR for 43 rpm motor(goBilda YellowJacket)
+        SM = hardwareMap.dcMotor.get("SM");
+        SM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        SM.setDirection(DcMotor.Direction.REVERSE);
+        SM.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //3895.9 PPR for 43 rpm motor(goBilda YellowJacket)
 
-            SV = hardwareMap.servo.get("SV");
-            SV.setPosition(SVdefault);
+        SV = hardwareMap.servo.get("SV");
+        SV.setPosition(SVdefault);
 
-            CS = hardwareMap.get(NormalizedColorSensor.class, "CS");
+        CS = hardwareMap.get(NormalizedColorSensor.class, "CS");
 
-            NormalizedRGBA colors = CS.getNormalizedColors();
+        NormalizedRGBA colors = CS.getNormalizedColors();
 
-            final float[] hsvValues = new float[3];
+        final float[] hsvValues = new float[3];
 
-            if (Math.abs(SM.getCurrentPosition() - SM.getTargetPosition()) < 10) {
-                atTargetPos = true;
-            }
-            //color check:
-            if (Math.abs(hsvValues[0] - GHue) <= 20) {
-                BallGreen = true;
-                BallPurple = false;
-            } else if (Math.abs(hsvValues[0] - PHue) <= 20) {
-                BallPurple = true;
-                BallGreen = false;
-            }
-
-            telemetry.addData("BallGreen: ", BallGreen);
-            telemetry.addData("BallPurple: ", BallPurple);
-            telemetry.update();
-
-
+        if (Math.abs(SM.getCurrentPosition() - SM.getTargetPosition()) < 10) {
+            atTargetPos = true;
         }
+        //color check:
+        if (Math.abs(hsvValues[0] - GHue) <= 20) {
+            BallGreen = true;
+            BallPurple = false;
+        } else if (Math.abs(hsvValues[0] - PHue) <= 20) {
+            BallPurple = true;
+            BallGreen = false;
+        }else {
+            BallPurple = false;
+            BallGreen = false;
+        }
+
+        telemetry.addData("BallGreen: ", BallGreen);
+        telemetry.addData("BallPurple: ", BallPurple);
+        telemetry.update();
 
 
     }
-}
+
+
+    }
+
+
